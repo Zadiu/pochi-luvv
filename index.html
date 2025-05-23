@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Matrix Love Rain Effect</title>
+<style>
+  /* Fondo negro */
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: #160916;
+    color: #9b2d76;
+    font-family: 'Courier New', Courier, monospace;
+  }
+  canvas {
+    display: block;
+    background: linear-gradient(0deg, #1a0a1a 0%, #330022 100%);
+  }
+</style>
+</head>
+<body>
+<canvas id="matrixCanvas"></canvas>
+<script>
+(() => {
+  const canvas = document.getElementById('matrixCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Pantalla completa
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+
+  // Rain mode
+  const letters = ['P', 'O', 'C', 'H', 'I'];
+  const heart = '♥';
+  // mas corazones
+  const extras = ['❤','❥','💕','💖','💗']; 
+  const characters = ['P', 'O', 'C', 'H', 'i', heart, '♡', '*', '+', '♥'];
+
+  // Estilo de colores para cada caracter
+
+  const columnCount = Math.floor(width / 20);
+  const fontSize = 20;
+
+  const drops = [];
+  for (let i = 0; i < columnCount; i++) {
+    drops[i] = Math.random() * -1000; // random 
+  }
+
+  // un frame probablemente mas
+  function draw() {
+    ctx.fillStyle = 'rgba(26, 10, 26, 0.15)'; // efecto fade
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.font = fontSize + 'px Courier New';
+    ctx.textBaseline = 'top';
+
+    for (let i = 0; i < columnCount; i++) {
+      const x = i * fontSize;
+
+      let charChoiceChance = Math.random();
+      let char = ' ';
+      if (charChoiceChance < 0.5) {
+        // 30% 
+        const loveHeartChars = ['P', 'O', 'C', 'H', 'I', heart, '♡', '♥'];
+        char = loveHeartChars[Math.floor(Math.random() * loveHeartChars.length)];
+      } else if (charChoiceChance < 0.5) {
+        // 20% 
+        char = Math.random() < 0.5 ? '*' : '+';
+      } else {
+        // 50%
+        char = ' ';
+      }
+
+      
+      let y = drops[i] * fontSize;
+
+      if (char !== ' ') {
+        
+        if (char === heart || char === '♥' || char === '♡') {
+          // corazones rosas
+          ctx.fillStyle = 'rgba(255,105,180,0.9)'; 
+          ctx.shadowColor = '#ff66cc';
+          ctx.shadowBlur = 12;
+        } else if (char === 'L' || char === 'O' || char === 'V' || char === 'E') {
+         
+          ctx.fillStyle = 'rgba(255,20,147,1)'; 
+          ctx.shadowColor = '#ff1493';
+          ctx.shadowBlur = 8;
+        } else {
+         
+          ctx.fillStyle = 'rgba(255,105,180,0.5)';
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+        }
+        ctx.fillText(char, x, y);
+      }
+
+      drops[i] += 0.5 + Math.random() * 0.7;
+
+      if (drops[i] * fontSize > height + fontSize) {
+        drops[i] = Math.random() * -100;
+      }
+    }
+  }
+
+  function resizeCanvas() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+
+  function loop() {
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  ctx.fillStyle = '#1a0a1a';
+  ctx.fillRect(0, 0, width, height);
+
+  loop();
+})();
+</script>
+</body>
+</html>
+
