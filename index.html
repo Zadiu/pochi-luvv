@@ -29,22 +29,10 @@
     user-select: none;
     pointer-events: auto;
     filter: drop-shadow(0 0 5px rgba(155,45,118,0.8));
-    animation: heartbeat 2s infinite ease-in-out;
     will-change: transform, opacity;
     z-index: 10;
     color: #9b2d76; /* fallback */
     fill: #9b2d76;
-  }
-
-  @keyframes heartbeat {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-    50% {
-      transform: scale(1.15);
-      opacity: 0.85;
-    }
   }
 
   /* Contenedor de partículas */
@@ -91,13 +79,10 @@
 </head>
 <body>
 <canvas id="matrixCanvas"></canvas>
-
-<!-- Contenedor partículas -->
 <div class="particles" id="particles-container"></div>
 
 <script>
 (() => {
-  // Código matrix original sin cambios
   const canvas = document.getElementById('matrixCanvas');
   const ctx = canvas.getContext('2d');
   let width = window.innerWidth;
@@ -107,50 +92,28 @@
 
   const fontSize = 20;
   const columnCount = Math.floor(width / fontSize);
-  const drops = [];
-  for(let i=0; i<columnCount; i++) drops[i] = Math.random()* -1000;
+  const drops = Array.from({ length: columnCount }, () => Math.random() * -1000);
 
   function draw() {
     ctx.fillStyle = 'rgba(26, 10, 26, 0.15)';
-    ctx.fillRect(0,0,width,height);
-    ctx.font = fontSize + 'px Courier New';
+    ctx.fillRect(0, 0, width, height);
+    ctx.font = `${fontSize}px Courier New`;
     ctx.textBaseline = 'top';
 
-    for(let i=0; i<columnCount; i++) {
+    for (let i = 0; i < columnCount; i++) {
       const x = i * fontSize;
-      let charChoiceChance = Math.random();
-      let char = ' ';
+      const char = Math.random() < 0.5 ? ['P', 'O', 'C', 'H', 'I', '♥', '♡', '❤'][Math.floor(Math.random() * 8)] : ' ';
+      const y = drops[i] * fontSize;
 
-      if (charChoiceChance < 0.5) {
-        const loveHeartChars = ['P', 'O', 'C', 'H', 'I', '♥', '♡', '❤'];
-        char = loveHeartChars[Math.floor(Math.random()*loveHeartChars.length)];
-      } else if (charChoiceChance < 0.5) {
-        char = Math.random() < 0.5 ? '*' : '+';
-      } else {
-        char = ' ';
+      if (char !== ' ') {
+        ctx.fillStyle = char === '♥' || char === '♡' || char === '❤' ? 'rgba(255,105,180,0.9)' : 'rgba(255,20,147,1)';
+        ctx.shadowColor = char === '♥' || char === '♡' || char === '❤' ? '#ff66cc' : 'transparent';
+        ctx.shadowBlur = char === '♥' || char === '♡' || char === '❤' ? 12 : 0;
+        ctx.fillText(char, x, y);
       }
 
-      let y = drops[i] * fontSize;
-
-      if(char !== ' ') {
-        if(char === '♥' || char === '♡' || char === '❤') {
-          ctx.fillStyle = 'rgba(255,105,180,0.9)';
-          ctx.shadowColor = '#ff66cc';
-          ctx.shadowBlur = 12;
-        } else if('LOVE'.includes(char)) {
-          ctx.fillStyle = 'rgba(255,20,147,1)';
-          ctx.shadowColor = '#ff1493';
-          ctx.shadowBlur = 8;
-        } else {
-          ctx.fillStyle = 'rgba(255,105,180,0.5)';
-          ctx.shadowColor = 'transparent';
-          ctx.shadowBlur = 0;
-        }
-        ctx.fillText(char,x,y);
-      }
-
-      drops[i] += 0.5 + Math.random()*0.7;
-      if(drops[i]*fontSize > height+fontSize) drops[i] = Math.random()* -100;
+      drops[i] += 0.5 + Math.random() * 0.7;
+      if (drops[i] * fontSize > height + fontSize) drops[i] = Math.random() * -100;
     }
   }
 
@@ -166,118 +129,116 @@
     draw();
     requestAnimationFrame(loop);
   }
-  ctx.fillStyle = '#1a0a1a';
-  ctx.fillRect(0,0,width,height);
   loop();
 
-
-  // Código corazones con límite y mejor rendimiento
-
   const particlesContainer = document.getElementById('particles-container');
+  const MAX_HEARTS = 12;
+  const currentHearts = [];
 
-  function createParticle(x,y) {
+  function createParticle(x, y) {
     const particle = document.createElement('div');
     particle.classList.add('particle');
-    particle.style.left = x + 'px';
-    particle.style.top = y + 'px';
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
 
-    const angle = Math.random()*2*Math.PI;
-    const distance = 60 + Math.random()*40;
-    const dx = Math.cos(angle)*distance + 'px';
-    const dy = Math.sin(angle)*distance + 'px';
-    particle.style.setProperty('--dx', dx);
-    particle.style.setProperty('--dy', dy);
+    const angle = Math.random() * 2 * Math.PI;
+    const distance = 60 + Math.random() * 40;
+    particle.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+    particle.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
 
     particlesContainer.appendChild(particle);
-
-    particle.addEventListener('animationend', () => {
-      particle.remove();
-    });
+    particle.addEventListener('animationend', () => particle.remove());
   }
 
-  const MAX_HEARTS = 12; // límite máximo de corazones simultáneos
-  let currentHearts = [];
-
   function createHeart() {
-    if(currentHearts.length >= MAX_HEARTS) return; // no crear si hay demasiados
+    if (currentHearts.length >= MAX_HEARTS) return;
 
-    const heart = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    heart.setAttribute('viewBox','0 0 24 24');
-    heart.setAttribute('width','40');
-    heart.setAttribute('height','40');
+    const heart = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    heart.setAttribute('viewBox', '0 0 24 24');
+    heart.setAttribute('width', '40');
+    heart.setAttribute('height', '40');
     heart.classList.add('heart-floating');
 
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d','M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
-    path.setAttribute('fill','currentColor');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+    path.setAttribute('fill', 'currentColor');
     heart.appendChild(path);
 
     const offset = 50;
-    const x = Math.random()*(window.innerWidth - offset*2) + offset;
-    const y = Math.random()*(window.innerHeight - offset*2) + offset;
-    heart.style.left = x + 'px';
-    heart.style.top = y + 'px';
+    const x = Math.random() * (window.innerWidth - offset * 2) + offset;
+    const y = Math.random() * (window.innerHeight - offset * 2) + offset;
+    heart.style.left = `${x}px`;
+    heart.style.top = `${y}px`;
 
-    const baseColor = [155,45,118];
-    let r = baseColor[0] + (Math.random()*40-20);
-    let g = baseColor[1] + (Math.random()*30-15);
-    let b = baseColor[2] + (Math.random()*40-20);
-    r = Math.min(255,Math.max(0,r));
-    g = Math.min(255,Math.max(0,g));
-    b = Math.min(255,Math.max(0,b));
+    const baseColor = [155, 45, 118];
+    const r = Math.min(255, Math.max(0, baseColor[0] + (Math.random() * 40 - 20)));
+    const g = Math.min(255, Math.max(0, baseColor[1] + (Math.random() * 30 - 15)));
+    const b = Math.min(255, Math.max(0, baseColor[2] + (Math.random() * 40 - 20)));
     heart.style.color = `rgba(${r},${g},${b},0.85)`;
+
+    // Animación de suspensión leve y random por corazón:
+    const duration = 3000 + Math.random() * 2000; // entre 3 y 5 segundos
+    const amplitude = 5 + Math.random() * 5; // entre 5px y 10px
+    let start = null;
+    function floatAnimation(timestamp) {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      // Movimiento sinusoidal vertical leve
+      const deltaY = Math.sin((elapsed / duration) * 2 * Math.PI) * amplitude;
+      heart.style.transform = `translateY(${deltaY}px)`;
+      requestAnimationFrame(floatAnimation);
+    }
+    requestAnimationFrame(floatAnimation);
 
     document.body.appendChild(heart);
     currentHearts.push(heart);
 
-    // evento click para explotar
-    heart.addEventListener('click', e => {
+    heart.addEventListener('click', (e) => {
       e.stopPropagation();
       const rect = heart.getBoundingClientRect();
-      const centerX = rect.left + rect.width/2;
-      const centerY = rect.top + rect.height/2;
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
 
-      for(let i=0; i<15; i++) {
+      for (let i = 0; i < 15; i++) {
         createParticle(centerX, centerY);
       }
 
       heart.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
-      heart.style.transform = 'scale(0)';
+      heart.style.transform += ' scale(0)';
       heart.style.opacity = '0';
 
       setTimeout(() => {
         heart.remove();
-        currentHearts = currentHearts.filter(h => h !== heart);
+        currentHearts.splice(currentHearts.indexOf(heart), 1);
       }, 700);
     });
 
-    // flotación suave y eliminación automática
-    const floatDuration = 15000 + Math.random()*10000;
-
-    heart.animate([
-      {transform: 'translateY(0)'},
-      {transform: `translateY(-${20+Math.random()*60}px)`}
-    ], {
-      duration: floatDuration,
-      easing: 'ease-out',
-      fill: 'forwards'
-    });
-
+    const floatDuration = 15000 + Math.random() * 10000;
     setTimeout(() => {
-      if(document.body.contains(heart)){
+      if (document.body.contains(heart)) {
         heart.remove();
-        currentHearts = currentHearts.filter(h => h !== heart);
+        currentHearts.splice(currentHearts.indexOf(heart), 1);
       }
     }, floatDuration + 50);
   }
 
   function heartGeneratorLoop() {
     createHeart();
-    // Generar corazones más espaciados para evitar lagueo
-    setTimeout(heartGeneratorLoop, 800 + Math.random()*1200);
+    setTimeout(heartGeneratorLoop, 800 + Math.random() * 1200);
   }
 
   heartGeneratorLoop();
+
+  // Manejar resize para el canvas
+  function resizeCanvas() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  // Función de dibujo matrix ya definida arriba (no modificar aquí)
 
 })();
 </script>
