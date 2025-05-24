@@ -127,6 +127,140 @@
   loop();
 })();
 </script>
+<div class="hearts-container">
+  <div class="heart" title="¡Haz clic en mí!">
+    <svg viewBox="0 0 24 24" width="60" height="60" aria-hidden="true">
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 
+        4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 
+        19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+    </svg>
+  </div>
+  <div class="heart" title="¡Haz clic en mí!">
+    <svg viewBox="0 0 24 24" width="60" height="60" aria-hidden="true">
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 
+        4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 
+        19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+    </svg>
+  </div>
+</div>
+
+<div class="particles" id="particles-container"></div>
+
+<style>
+  /* Estilo para los corazones */
+  .hearts-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 30px;
+    z-index: 10;
+  }
+
+  .heart {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .heart:hover {
+    transform: scale(1.2);
+  }
+
+  /* Partículas */
+  .particles {
+    position: fixed;
+    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: visible;
+  }
+
+  .particle {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background-color: #ff5a7d;
+    clip-path: polygon(
+      50% 0%,
+      61% 17%,
+      98% 35%,
+      82% 60%,
+      80% 99%,
+      50% 80%,
+      20% 100%,
+      20% 60%,
+      2% 35%,
+      39% 17%
+    );
+    opacity: 0.9;
+    transform-origin: center;
+    animation: explode 700ms forwards ease-out;
+  }
+
+  @keyframes explode {
+    to {
+      transform: translate(var(--dx), var(--dy)) scale(0);
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  const hearts = document.querySelectorAll('.heart');
+  const particlesContainer = document.getElementById('particles-container');
+
+  function createParticle(x, y) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+
+    // Posicionar la partícula en la ubicación del clic
+    particle.style.left = x + 'px';
+    particle.style.top = y + 'px';
+
+    // Dirección y distancia aleatoria para la animación
+    const angle = Math.random() * 2 * Math.PI;
+    const distance = 80 + Math.random() * 40;
+    const dx = Math.cos(angle) * distance + 'px';
+    const dy = Math.sin(angle) * distance + 'px';
+
+    particle.style.setProperty('--dx', dx);
+    particle.style.setProperty('--dy', dy);
+
+    particlesContainer.appendChild(particle);
+
+    particle.addEventListener('animationend', () => {
+      particle.remove();
+    });
+  }
+
+  hearts.forEach(heart => {
+    heart.addEventListener('click', e => {
+      // Obtener la posición del corazón
+      const rect = heart.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      // Generar múltiples partículas
+      for (let i = 0; i < 12; i++) {
+        createParticle(centerX, centerY);
+      }
+
+      // Animar el corazón
+      heart.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
+      heart.style.transform = 'scale(0)';
+      heart.style.opacity = '0';
+
+      // Regenerar el corazón después de la animación
+      setTimeout(() => {
+        heart.style.transform = '';
+        heart.style.opacity = '';
+        heart.style.transition = '';
+      }, 700);
+    });
+  });
+</script>
 </body>
 </html>
 
