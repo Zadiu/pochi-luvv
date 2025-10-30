@@ -164,6 +164,28 @@
   const MAX_HEARTS = 12;
   const currentHearts = [];
 
+  // 💔 contador
+  let brokenCount = 0;
+  const counterDiv = document.createElement('div');
+  counterDiv.textContent = '💔 0';
+  counterDiv.style.position = 'fixed';
+  counterDiv.style.bottom = '15px';
+  counterDiv.style.left = '20px';
+  counterDiv.style.zIndex = '30';
+  counterDiv.style.color = '#ff69b4';
+  counterDiv.style.fontFamily = 'Courier New, monospace';
+  counterDiv.style.fontSize = '18px';
+  counterDiv.style.background = 'rgba(26, 10, 26, 0.7)';
+  counterDiv.style.padding = '6px 10px';
+  counterDiv.style.border = '1px solid #9b2d76';
+  counterDiv.style.borderRadius = '10px';
+  counterDiv.style.backdropFilter = 'blur(6px)';
+  document.body.appendChild(counterDiv);
+
+  function updateCounter() {
+    counterDiv.textContent = `💔 ${brokenCount}`;
+  }
+
   function createParticle(x, y) {
     const particle = document.createElement('div');
     particle.classList.add('particle');
@@ -222,13 +244,14 @@
 
     heart.addEventListener('click', (e) => {
       e.stopPropagation();
+      brokenCount++; // 💔 suma uno
+      updateCounter();
+
       const rect = heart.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
 
-      for (let i = 0; i < 15; i++) {
-        createParticle(centerX, centerY);
-      }
+      for (let i = 0; i < 15; i++) createParticle(centerX, centerY);
 
       heart.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
       heart.style.transform += ' scale(0)';
