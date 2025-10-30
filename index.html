@@ -6,7 +6,6 @@
 <link rel="icon" type="image/png" href="cafe.png"> 
 <title>♡pochi</title>
 <style>
-  /* Fondo negro */
   body {
     margin: 0;
     overflow: hidden;
@@ -20,7 +19,6 @@
     background: linear-gradient(0deg, #1a0a1a 0%, #330022 100%);
   }
 
-  /* Estilo corazones flotantes */
   .heart-floating {
     position: fixed;
     width: 40px;
@@ -31,11 +29,10 @@
     filter: drop-shadow(0 0 5px rgba(155,45,118,0.8));
     will-change: transform, opacity;
     z-index: 10;
-    color: #9b2d76; /* fallback */
+    color: #9b2d76;
     fill: #9b2d76;
   }
 
-  /* Contenedor de partículas */
   .particles {
     position: fixed;
     pointer-events: none;
@@ -75,14 +72,53 @@
       opacity: 0;
     }
   }
+
+  /* 🎵 Controles de música */
+  .music-controls {
+    position: fixed;
+    bottom: 15px;
+    right: 20px;
+    z-index: 30;
+    background: rgba(26, 10, 26, 0.8);
+    border: 1px solid #9b2d76;
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ff69b4;
+    backdrop-filter: blur(6px);
+  }
+
+  .music-controls button {
+    background: none;
+    border: none;
+    color: #ff69b4;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .music-controls input[type="range"] {
+    accent-color: #9b2d76;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
 <canvas id="matrixCanvas"></canvas>
 <div class="particles" id="particles-container"></div>
 
+<!-- 🎶 Controles de música -->
+<div class="music-controls">
+  <button id="playPauseBtn">⏸</button>
+  <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.4">
+</div>
+
+<audio id="bgMusic" src="seven.mp3" type="audio/mpeg" loop autoplay></audio>
+
 <script>
 (() => {
+  // === FONDO MATRIX + CORAZONES ===
   const canvas = document.getElementById('matrixCanvas');
   const ctx = canvas.getContext('2d');
   let width = window.innerWidth;
@@ -117,20 +153,13 @@
     }
   }
 
-  function resizeCanvas() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-  }
-  window.addEventListener('resize', resizeCanvas);
-
   function loop() {
     draw();
     requestAnimationFrame(loop);
   }
   loop();
 
+  // === CORAZONES INTERACTIVOS ===
   const particlesContainer = document.getElementById('particles-container');
   const MAX_HEARTS = 12;
   const currentHearts = [];
@@ -171,19 +200,17 @@
     heart.style.top = `${y}px`;
 
     const baseColor = [155, 45, 118];
-    const r = Math.min(255, Math.max(0, baseColor[0] + (Math.random() * 40 - 20)));
-    const g = Math.min(255, Math.max(0, baseColor[1] + (Math.random() * 30 - 15)));
-    const b = Math.min(255, Math.max(0, baseColor[2] + (Math.random() * 40 - 20)));
+    const r = baseColor[0] + (Math.random() * 40 - 20);
+    const g = baseColor[1] + (Math.random() * 30 - 15);
+    const b = baseColor[2] + (Math.random() * 40 - 20);
     heart.style.color = `rgba(${r},${g},${b},0.85)`;
 
-    // Animación de suspensión leve y random por corazón:
-    const duration = 3000 + Math.random() * 2000; // entre 3 y 5 segundos
-    const amplitude = 5 + Math.random() * 5; // entre 5px y 10px
+    const duration = 3000 + Math.random() * 2000;
+    const amplitude = 5 + Math.random() * 5;
     let start = null;
     function floatAnimation(timestamp) {
       if (!start) start = timestamp;
       const elapsed = timestamp - start;
-      // Movimiento sinusoidal vertical leve
       const deltaY = Math.sin((elapsed / duration) * 2 * Math.PI) * amplitude;
       heart.style.transform = `translateY(${deltaY}px)`;
       requestAnimationFrame(floatAnimation);
@@ -206,7 +233,6 @@
       heart.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
       heart.style.transform += ' scale(0)';
       heart.style.opacity = '0';
-
       setTimeout(() => {
         heart.remove();
         currentHearts.splice(currentHearts.indexOf(heart), 1);
@@ -226,22 +252,29 @@
     createHeart();
     setTimeout(heartGeneratorLoop, 800 + Math.random() * 1200);
   }
-
   heartGeneratorLoop();
 
-  // Manejar resize para el canvas
-  function resizeCanvas() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-  }
-  window.addEventListener('resize', resizeCanvas);
+  // === 🎵 MÚSICA ===
+  const bgMusic = document.getElementById('bgMusic');
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  const volumeSlider = document.getElementById('volumeSlider');
 
-  // Función de dibujo matrix ya definida arriba (no modificar aquí)
+  bgMusic.volume = 0.4;
 
+  playPauseBtn.addEventListener('click', () => {
+    if (bgMusic.paused) {
+      bgMusic.play();
+      playPauseBtn.textContent = '⏸';
+    } else {
+      bgMusic.pause();
+      playPauseBtn.textContent = '▶';
+    }
+  });
+
+  volumeSlider.addEventListener('input', (e) => {
+    bgMusic.volume = e.target.value;
+  });
 })();
 </script>
 </body>
 </html>
-
